@@ -11,9 +11,14 @@
         <div class="container-fluid">
             <a class="navbar-brand" href="/">My App</a>
             <div>
-                <!-- home.html or the template where the links exist -->
-            <a class="btn btn-primary" href="{{ url_for('auth') }}?type=signup">Sign Up</a>
-            <a class="btn btn-secondary" href="{{ url_for('auth') }}?type=signin">Sign In</a>
+                <!-- Dynamic navbar links -->
+                {% if current_user.is_authenticated %}
+                    <a class="btn btn-primary" href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a class="btn btn-danger" href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                    <a class="btn btn-primary" href="{{ url_for('auth') }}?type=signup">Sign Up</a>
+                    <a class="btn btn-secondary" href="{{ url_for('auth') }}?type=signin">Sign In</a>
+                {% endif %}
             </div>
         </div>
     </nav>
