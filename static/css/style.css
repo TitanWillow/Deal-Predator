@@ -1,11 +1,28 @@
+html, body {
+    height: 100%; /* Ensure full height */
+    margin: 0; /* Remove default margin */
+}
 body {
-    background-color: #f8f9fa; /* Light gray background for modern look */
+    background-image: url('./../images/logo2.png');
+    background-color: #cccccc; /* Light gray background for fallback */
+    background-position: center; 
+    background-position-y: 65%;/* Center the image */
+    background-repeat: no-repeat; /* Don't repeat the image */
+    background-size: 38%; /* Cover the entire body */
     font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    height: 100vh; /* Ensure the body takes the full viewport height */
 }
-
+#blk{
+    height: 80vh;
+}
+#main-card{
+    max-width: 400px; 
+    width: 100%;
+    padding : 0.8rem;
+}
 .card {
     border-radius: 8px; /* Rounded corners for a polished look */
     overflow: hidden;   /* Ensures child elements don't overlap rounded edges */
