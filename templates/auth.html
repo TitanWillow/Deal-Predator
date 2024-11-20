@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 500px;">
+    <!-- Logo/Header -->
+    <div class="text-center mb-4">
+        <img src="https://via.placeholder.com/100" alt="Logo" class="mb-3">
+        <h3 class="fw-bold">
+            {% if form_type == 'signin' %}
+                Sign In
+            {% else %}
+                Sign Up
+            {% endif %}
+        </h3>
+    </div>
+
+    <!-- Form Section -->
+    {% if form_type == 'signin' %}
+    <form action="/signin" method="post">
+        <div class="mb-3">
+            <label for="signin-email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="signin-email" name="email" placeholder="Enter your email" required>
+        </div>
+        <div class="mb-3">
+            <label for="signin-password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="signin-password" name="password" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Sign In</button>
+    </form>
+    {% else %}
+    <form action="/signup" method="post">
+        <div class="mb-3">
+            <label for="signup-name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="signup-name" name="name" placeholder="Enter your name" required>
+        </div>
+        <div class="mb-3">
+            <label for="signup-email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="signup-email" name="email" placeholder="Enter your email" required>
+        </div>
+        <div class="mb-3">
+            <label for="signup-password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="signup-password" name="password" placeholder="Create a password" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

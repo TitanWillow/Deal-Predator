@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Product Dashboard</h1>
+    
+    <!-- Search Form -->
+    <form class="d-flex mb-4" method="get" action="/dashboard">
+        <input class="form-control me-2" type="search" name="q" placeholder="Search products" value="{{ search_query }}" aria-label="Search">
+        <button class="btn btn-outline-primary" type="submit">Search</button>
+    </form>
+
+    <!-- Product List -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Discount (%)</th>
+                <th>Link</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product[0] }}</td>
+                <td>${{ product[1] }}</td>
+                <td>{{ product[2] }}%</td>
+                <td><a href="{{ product[3] }}" class="btn btn-sm btn-primary" target="_blank">View</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
