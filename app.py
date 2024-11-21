@@ -24,16 +24,23 @@ def init_db():
                             email TEXT UNIQUE,
                             name TEXT,
                             password TEXT)''')
-        cursor.execute('''CREATE TABLE IF NOT EXISTS data (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            title TEXT,
-                            description TEXT)''')
-        cursor.execute('''CREATE TABLE IF NOT EXISTS products (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
-                            name TEXT,
-                            price REAL,
-                            discount REAL,
-                            link TEXT)''')
+        cursor.execute('''CREATE TABLE IF NOT EXISTS user_map (
+                            id TEXT PRIMARY KEY,
+                            foreign key(product_ids) TEXT NOT NULL references products(id),
+                            foreign key(userid) TEXT NOT NULL references users(userid)
+                        )
+                        ''')
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS products (
+            id TEXT PRIMARY KEY,
+            product_url TEXT NOT NULL,
+            product_name TEXT NOT NULL,
+            class TEXT,
+            price REAL,
+            product_identifier TEXT UNIQUE,
+            shopping_site TEXT
+        )
+        ''')
         
 @login_manager.user_loader
 def load_user(user_id):
