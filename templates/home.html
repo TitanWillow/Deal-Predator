@@ -4,17 +4,15 @@
 <div class="d-flex justify-content-center align-items-center" id = "blk">
     <div class="card shadow-lg" id="main-card">
         <div class="card-body">
-            <form action="/add" method="post">
-                <div class="mb-3">
-                    <label for="url">Product URL</label>
-                    <input type="url" name="url" id="url" placeholder="https://example.com" pattern="https://.*" size="30" required />
-                </div>
-                <div class="mb-3">
-                    <label for="totalAmt">Price</label>
-                    <input type="number" step="0.01" id="totalAmt">
-                </div>
+            <form action="/add" class="form" method="post">
+                <input type="url" placeholder="Product Url" class="form__input" id="url" name = "url" required/>
+                <label for="url" class="form__label">Product URL</label>
+                <input type="email" placeholder="Email" class="form__input" name="email" id="email" required/>
+                <label for="email" class="form__label">Email</label>
+                <input type="number" step="0.01" placeholder="price" class="form__input" name="price" id="price" />
+                <label for="price" class="form__label">Price</label>
                 <button type="submit" class="btn btn-primary w-100">Submit</button>
-            </form>
+             </form>
         </div>
     </div>
 </div>

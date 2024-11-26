@@ -26,10 +26,16 @@ def init_db():
                             password TEXT)''')
         cursor.execute('''CREATE TABLE IF NOT EXISTS user_map (
                             id TEXT PRIMARY KEY,
-                            foreign key(product_ids) TEXT NOT NULL references products(id),
-                            foreign key(userid) TEXT NOT NULL references users(userid)
-                        )
-                        ''')
+                            product_ids TEXT NOT NULL,
+                            userid TEXT NOT NULL,
+                            FOREIGN KEY (product_ids) REFERENCES products(id),
+                            FOREIGN KEY (userid) REFERENCES users(userid)
+                        )''')
+        cursor.execute('''CREATE TABLE IF NOT EXISTS initial_entry (
+                            product_url TEXT NOT NULL,
+                            price REAL,
+                            email TEXT NOT NULL
+                        )''')
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS products (
             id TEXT PRIMARY KEY,
@@ -138,28 +144,15 @@ def dashboard():
 
     return render_template('dashboard.html', products=products, search_query=search_query)
 
-@app.route('/seed_products')
-def seed_products():
-    products = [
-        ('Product A', 19.99, 10, 'https://example.com/product-a'),
-        ('Product B', 29.99, 20, 'https://example.com/product-b'),
-        ('Product C', 39.99, 5, 'https://example.com/product-c'),
-    ]
-    with sqlite3.connect("database.db") as conn:
-        cursor = conn.cursor()
-        cursor.executemany("INSERT INTO products (name, price, discount, link) VALUES (?, ?, ?, ?)", products)
-        conn.commit()
-    return "Products seeded!"
-
-
 @app.route('/add', methods=['POST'])
 def add_data():
-    title = request.form['title']
-    description = request.form['description']
+    product_url = request.form['url']
+    price = request.form['price']
+    email = request.form['email']
     
     with sqlite3.connect("database.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO data (title, description) VALUES (?, ?)", (title, description))
+        cursor.execute("INSERT INTO initial_entry (product_url, price, email) VALUES (?, ?, ?)", (product_url, price, email))
         conn.commit()
 
     # Flash success message
