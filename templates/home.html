@@ -1,16 +1,37 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="d-flex justify-content-center align-items-center" id = "blk">
-    <div class="card shadow-lg" id="main-card">
-        <div class="card-body">
+<div class="d-flex justify-content-center align-items-center" id="blk">
+    <div class="card shadow-lg" id="main-card", style="width: 90%;">
+        <div class="card-body top" style="height: 40%;">
+            <!-- Toggle for Targets -->
+            <div class="form-check form-switch my-3">
+                <input class="form-check-input" type="checkbox" id="targetToggle" onchange="toggleTargetMode()">
+                <label class="form-check-label" for="targetToggle">Use percentage</label>
+            </div>
             <form action="/add" class="form" method="post">
-                <input type="url" placeholder="Product Url" class="form__input" id="url" name = "url" required/>
-                <label for="url" class="form__label">Product URL</label>
+                <!-- Product URL -->
+                <input type="url" placeholder="Product Url" class="form__input" id="url" name="url" style="margin-top: 5%;" required/>
+                <label for="url" class="form__label" >Product URL</label>
+
+                <!-- Email -->
                 <input type="email" placeholder="Email" class="form__input" name="email" id="email" required/>
                 <label for="email" class="form__label">Email</label>
-                <input type="number" step="0.01" placeholder="price" class="form__input" name="price" id="price" />
+
+                <!-- Price -->
+                <input type="number" step="0.01" placeholder="Price" class="form__input" name="price" id="price" />
                 <label for="price" class="form__label">Price</label>
+
+                <!-- Target Inputs -->
+                
+                    <input type="number" step="0.01" placeholder="Target 1" class="form__input" name="target1" id="target1" required/>
+                    <label for="target1" class="form__label">Target 1</label>
+
+                    <input type="number" step="0.01" placeholder="Target 2" class="form__input d-none" name="target2" id="target2" required/>
+                    <label for="target2" id="targetl2" class="form__label d-none">Target 2</label>
+                
+                <button type="button" class="btn btn-secondary w-100 mt-2" id="addTargetButton" onclick="addTarget()" style="margin-top: 0px;margin-bottom: 3%;">+ Add Target</button>
+                <!-- Submit Button -->
                 <button type="submit" class="btn btn-primary w-100">Submit</button>
              </form>
         </div>
@@ -31,6 +52,26 @@
 
 {% block scripts %}
 <script>
+    // Function to toggle target input modes
+    function toggleTargetMode() {
+        const isPercentageMode = document.getElementById('targetToggle').checked;
+        const target1 = document.getElementById('target1');
+        const target2 = document.getElementById('target2');
+
+        if (isPercentageMode) {
+            target1.placeholder = "Target 1 (%)";
+            target2.placeholder = "Target 2 (%)";
+        } else {
+            target1.placeholder = "Target 1";
+            target2.placeholder = "Target 2";
+        }
+    }
+
+    function addTarget() {
+        document.getElementById('target2').classList.remove('d-none');
+        document.getElementById('targetl2').classList.remove('d-none');
+        document.getElementById('addTargetButton').classList.add('d-none');
+    }
     // Auto-dismiss the flash message after 2 seconds
     setTimeout(function() {
         const alert = document.querySelector('.alert');

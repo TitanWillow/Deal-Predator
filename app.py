@@ -3,6 +3,7 @@ import sqlite3
 import bcrypt
 from flask import make_response
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from srapper import get_product;
 
 app = Flask(__name__)
 app.secret_key = 'hashedey'
@@ -34,7 +35,11 @@ def init_db():
         cursor.execute('''CREATE TABLE IF NOT EXISTS initial_entry (
                             product_url TEXT NOT NULL,
                             price REAL,
-                            email TEXT NOT NULL
+                            email TEXT NOT NULL,
+                            target1 REAL,
+                            target2 REAL,
+                            targetpct1 REAL,
+                            targetpct2 REAL
                         )''')
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS products (
@@ -44,7 +49,11 @@ def init_db():
             class TEXT,
             price REAL,
             product_identifier TEXT UNIQUE,
-            shopping_site TEXT
+            shopping_site TEXT,
+            target1 REAL,
+            target2 REAL,
+            targetpct1 REAL,
+            targetpct2 REAL
         )
         ''')
         
@@ -149,18 +158,30 @@ def add_data():
     product_url = request.form['url']
     price = request.form['price']
     email = request.form['email']
-    
+    target_mode = request.form['target_mode']
+    target1 = request.form['target1']
+    target2 = request.form['target2']
+
+    targetpct1 = targetpct2 = None
+
+    if target_mode == "percentage":
+        targetpct1 = target1
+        targetpct2 = target2
+        target1 = target2 = None
+
     with sqlite3.connect("database.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO initial_entry (product_url, price, email) VALUES (?, ?, ?)", (product_url, price, email))
+        cursor.execute('''INSERT INTO initial_entry 
+                          (product_url, price, email, target1, target2, targetpct1, targetpct2) 
+                          VALUES (?, ?, ?, ?, ?, ?, ?)''', 
+                       (product_url, price, email, target1, target2, targetpct1, targetpct2))
         conn.commit()
-
+    get_product(product_url,True)
     # Flash success message
     flash('Data added successfully!', 'success')
 
     # Redirect to home page
     return redirect(url_for('home'))
-
 
 if __name__ == '__main__':
     init_db()
