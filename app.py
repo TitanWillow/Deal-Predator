@@ -21,14 +21,17 @@ def init_db():
     with sqlite3.connect("database.db") as conn:
         cursor = conn.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS users (
-                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            userid INTEGER PRIMARY KEY AUTOINCREMENT,
                             email TEXT UNIQUE,
                             name TEXT,
                             password TEXT)''')
         cursor.execute('''CREATE TABLE IF NOT EXISTS user_map (
-                            id TEXT PRIMARY KEY,
-                            product_ids TEXT NOT NULL,
+                            product_id TEXT NOT NULL,
                             userid TEXT NOT NULL,
+                            target1 REAL,
+                            target2 REAL,
+                            targetpct1 REAL,
+                            targetpct2 REAL,
                             FOREIGN KEY (product_ids) REFERENCES products(id),
                             FOREIGN KEY (userid) REFERENCES users(userid)
                         )''')
@@ -43,17 +46,12 @@ def init_db():
                         )''')
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS products (
-            id TEXT PRIMARY KEY,
+            product_id TEXT PRIMARY KEY,
             product_url TEXT NOT NULL,
             product_name TEXT NOT NULL,
             class TEXT,
             price REAL,
-            product_identifier TEXT UNIQUE,
-            shopping_site TEXT,
-            target1 REAL,
-            target2 REAL,
-            targetpct1 REAL,
-            targetpct2 REAL
+            shopping_site TEXT
         )
         ''')
         
@@ -158,9 +156,9 @@ def add_data():
     product_url = request.form['url']
     price = request.form['price']
     email = request.form['email']
-    target_mode = request.form['target_mode']
-    target1 = request.form['target1']
-    target2 = request.form['target2']
+    target_mode = request.form.get('target_mode', 'standard')  # Default to 'standard'
+    target1 = request.form.get('target1', None)
+    target2 = request.form.get('target2', None)
 
     targetpct1 = targetpct2 = None
 
@@ -176,11 +174,10 @@ def add_data():
                           VALUES (?, ?, ?, ?, ?, ?, ?)''', 
                        (product_url, price, email, target1, target2, targetpct1, targetpct2))
         conn.commit()
-    get_product(product_url,True)
-    # Flash success message
+    url=[product_url]
+    get_product(url,True, price)
+    print(price)
     flash('Data added successfully!', 'success')
-
-    # Redirect to home page
     return redirect(url_for('home'))
 
 if __name__ == '__main__':

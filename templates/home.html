@@ -10,6 +10,7 @@
                 <label class="form-check-label" for="targetToggle">Use percentage</label>
             </div>
             <form action="/add" class="form" method="post">
+                <input type="hidden" name="target_mode" id="target_mode" value="standard" />
                 <!-- Product URL -->
                 <input type="url" placeholder="Product Url" class="form__input" id="url" name="url" style="margin-top: 5%;" required/>
                 <label for="url" class="form__label" >Product URL</label>
@@ -27,7 +28,7 @@
                     <input type="number" step="0.01" placeholder="Target 1" class="form__input" name="target1" id="target1" required/>
                     <label for="target1" class="form__label">Target 1</label>
 
-                    <input type="number" step="0.01" placeholder="Target 2" class="form__input d-none" name="target2" id="target2" required/>
+                    <input type="number" step="0.01" placeholder="Target 2" class="form__input d-none" name="target2" id="target2"/>
                     <label for="target2" id="targetl2" class="form__label d-none">Target 2</label>
                 
                 <button type="button" class="btn btn-secondary w-100 mt-2" id="addTargetButton" onclick="addTarget()" style="margin-top: 0px;margin-bottom: 3%;">+ Add Target</button>
@@ -54,17 +55,9 @@
 <script>
     // Function to toggle target input modes
     function toggleTargetMode() {
-        const isPercentageMode = document.getElementById('targetToggle').checked;
-        const target1 = document.getElementById('target1');
-        const target2 = document.getElementById('target2');
-
-        if (isPercentageMode) {
-            target1.placeholder = "Target 1 (%)";
-            target2.placeholder = "Target 2 (%)";
-        } else {
-            target1.placeholder = "Target 1";
-            target2.placeholder = "Target 2";
-        }
+        const targetModeInput = document.getElementById("target_mode");
+        const isPercentageMode = document.getElementById("targetToggle").checked;
+        targetModeInput.value = isPercentageMode ? "percentage" : "standard";
     }
 
     function addTarget() {
