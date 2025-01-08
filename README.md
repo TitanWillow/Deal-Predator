@@ -54,10 +54,6 @@
 2. The system will monitor the prices periodically.
 3. Receive Telegram notifications when the prices drop to your target.
 
-## Screenshots
-
-*(Add relevant screenshots of the dashboard and notifications here.)*
-
 ## Contribution
 
 Contributions are welcome! Please feel free to submit a pull request or open an issue for any bugs or feature requests.
