@@ -4,6 +4,7 @@ import bcrypt
 from flask import make_response
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from srapper import get_product;
+from telegramsend import *;
 
 app = Flask(__name__)
 app.secret_key = 'hashedey'
@@ -11,9 +12,10 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'auth'
 
 class User(UserMixin):
-    def __init__(self, id, email):
+    def __init__(self, id, email, telegram_name):
         self.id = id
         self.email = email
+        self.telegram_name = telegram_name
 
 users = {}
 # Initialize the database
@@ -24,6 +26,9 @@ def init_db():
                             userid INTEGER PRIMARY KEY AUTOINCREMENT,
                             email TEXT UNIQUE,
                             name TEXT,
+                            telegram_name text,
+                            chat_id text,
+                            registered boolean,
                             password TEXT)''')
         cursor.execute('''CREATE TABLE IF NOT EXISTS user_map (
                             product_id TEXT NOT NULL,
@@ -32,13 +37,14 @@ def init_db():
                             target2 REAL,
                             targetpct1 REAL,
                             targetpct2 REAL,
-                            FOREIGN KEY (product_ids) REFERENCES products(id),
+                            FOREIGN KEY (product_id) REFERENCES products(id),
                             FOREIGN KEY (userid) REFERENCES users(userid)
                         )''')
         cursor.execute('''CREATE TABLE IF NOT EXISTS initial_entry (
                             product_url TEXT NOT NULL,
                             price REAL,
-                            email TEXT NOT NULL,
+                            email TEXT,
+                            telegram_name text,
                             target1 REAL,
                             target2 REAL,
                             targetpct1 REAL,
@@ -59,10 +65,10 @@ def init_db():
 def load_user(user_id):
     with sqlite3.connect("database.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT id, email FROM users WHERE id = ?", (user_id,))
+        cursor.execute("SELECT id, email, telegram_name FROM users WHERE id = ?", (user_id,))
         result = cursor.fetchone()
         if result:
-            return User(id=result[0], email=result[1])
+            return User(id=result[0], email=result[1], telegram_name = result[2])
     return None
 
 @app.route('/')
@@ -78,17 +84,18 @@ def auth():
 
 @app.route('/signin', methods=['POST'])
 def signin():
-    email = request.form['email']
+    #email = request.form['email']
+    telegram_name = request.form['telegram_name']
     password = request.form['password']
 
     with sqlite3.connect("database.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT id, password FROM users WHERE email = ?", (email,))
+        cursor.execute("SELECT id, password FROM users WHERE telegram_name = ?", (telegram_name,))
         result = cursor.fetchone()
 
         # Check if the user exists and the password is correct
         if result and bcrypt.checkpw(password.encode('utf-8'), result[1]):
-            user = User(id=result[0], email=email)
+            user = User(id=result[0], telegram_name=telegram_name)
             login_user(user)  # Log the user in
             flash('Sign In successful!', 'success')
             return redirect(url_for('dashboard'))  # Redirect to the dashboard
@@ -102,20 +109,33 @@ def signin():
 @app.route('/signup', methods=['POST'])
 def signup():
     name = request.form['name']
-    email = request.form['email']
+    #email = request.form['email']
+    telegram_name = request.form['telegram_name']
     password = request.form['password']
-
-    # Hash the password
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
     with sqlite3.connect("database.db") as conn:
         cursor = conn.cursor()
         try:
-            cursor.execute("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", (name, email, hashed_password))
-            conn.commit()
-            flash('Sign Up successful! Please sign in.', 'success')
+            if telegram_name is not None:
+                cursor.execute("SELECT telegram_name, registered FROM users WHERE telegram_name = ?", (telegram_name,))
+                result = cursor.fetchone()
+                if result and result[1] is True:
+                    flash('Telegram Id already registered. Please sign in.', 'warning')
+                else:
+                    if get_chat_id(telegram_name) == False:
+                        flash('Please send a message to the bot or check the entered username')
+                    else :
+                        if result[1] is False:
+                            cursor.execute("UPDATE users SET password = ?, registered = ? WHERE telegram_name = ?",(hashed_password, True, telegram_name))
+                            conn.commit()
+                            flash('Sign Up successful! Please sign in.', 'success')
+                        else:
+                            cursor.execute("INSERT INTO users (name, telegram_name, password, registered) VALUES (?, ?, ?, ?)", (name, telegram_name, hashed_password, True))
+                            conn.commit()
+                            flash('Sign Up successful! Please sign in.', 'success') 
         except sqlite3.IntegrityError:
-            flash('Email already registered. Please sign in.', 'warning')
+            flash('Telegram Id already registered. Please sign in.', 'warning')
 
     return redirect(url_for('auth', type='signin'))
 
@@ -155,7 +175,8 @@ def dashboard():
 def add_data():
     product_url = request.form['url']
     price = request.form['price']
-    email = request.form['email']
+    #email = request.form['email']
+    telegram_name = request.form['telegram_name']
     target_mode = request.form.get('target_mode', 'standard')  # Default to 'standard'
     target1 = request.form.get('target1', None)
     target2 = request.form.get('target2', None)
@@ -170,9 +191,9 @@ def add_data():
     with sqlite3.connect("database.db") as conn:
         cursor = conn.cursor()
         cursor.execute('''INSERT INTO initial_entry 
-                          (product_url, price, email, target1, target2, targetpct1, targetpct2) 
+                          (product_url, price, telegram_name, target1, target2, targetpct1, targetpct2) 
                           VALUES (?, ?, ?, ?, ?, ?, ?)''', 
-                       (product_url, price, email, target1, target2, targetpct1, targetpct2))
+                       (product_url, price, telegram_name, target1, target2, targetpct1, targetpct2))
         conn.commit()
     url=[product_url]
     get_product(url,True, price)

@@ -51,12 +51,12 @@ def soup_find(soup,map,price,params):
             elif params['site'] == 'amazon':
                 params["product_id"] = get_asin(soup)
             elif params['site'] == 'flipkart':
-                params["products_id"] = soup.find(map['name']['external'],{map['name']['internal']:map['name']['value']}).text.lstrip().rstrip() + soup.find('div',{'id':'sellerName',}).find('span').find('span').text.lstrip().rstrip()
+                params["product_id"] = soup.find(map['name']['external'],{map['name']['internal']:map['name']['value']}).text.lstrip().rstrip() + soup.find('div',{'id':'sellerName',}).find('span').find('span').text.lstrip().rstrip()
             else:
                 params["product_id"] = soup.find(map['code']['external'],{map['code']['internal']:map['code']['value']}).text.lstrip().rstrip()
         except:
             params["product_id"]=''
-        if params['products_id'] == None:
+        if params['product_id'] == None:
             raise Exception("Sorry, invalid listing") 
         try:
             params["title"]=soup.find(map['title']['external'],{map['title']['internal']:map['title']['value']}).text.lstrip().rstrip()
@@ -87,7 +87,7 @@ def soup_html_way(product,map,price,params):
 def entry_to_db(params):
     cprice = 0
     if params['classrank'] != 'master':
-        params['cursor'].execute('SELECT min(price) FROM products where id = ?', (params['product_id'],))
+        params['cursor'].execute('SELECT min(price) FROM products where product_id = ?', (params['product_id'],))
         cprice = params['cursor'].fetchone()
         if cprice[0] is not None and cprice[0] > params['price']:
             params['classrank'] = 'min'
@@ -96,8 +96,8 @@ def entry_to_db(params):
     else:
         params['classrank'] = 'default'
     params['cursor'].execute('''
-        INSERT or replace INTO products (id, product_url, product_name, class, price, product_identifier, shopping_site)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT or replace INTO products (product_id, product_url, product_name, class, price, shopping_site)
+        VALUES (?, ?, ?, ?, ?, ?)
         ''', (params['product_id'], params['url'], params['title'] + ' ' + params['name'], params['classrank'], params["price"], params['site']))
     params['conn'].commit()
 
@@ -113,11 +113,11 @@ def  entry_from_web(product,price,params):
 
     elif contains(product, 'ajio') :
         map = {'title' : {'external' : 'h2', 'internal' : 'class', 'value' : 'brand-name'}, 'name' : {'external' : 'h1', 'internal': 'class', 'value' : 'prod-name'}, 'price' : {'external' : 'div', 'internal': 'class', 'value' : 'prod-sp'}} 
-        selenium_way(product,map)
+        selenium_way(product,map, price, params)
 
     elif contains(product, 'flipkart') :
         map = {'title' : {'external' : 'span', 'internal': 'class', 'value' : 'mEh187'}, 'name' : {'external' : 'span', 'internal': 'class', 'value' : 'VU-ZEz'}, 'price' : {'external' : 'span', 'internal': 'class', 'value' : 'Nx9bqj CxhGGd'}, 'site' : 'flipkart'}
-        selenium_way(product,map,price)
+        selenium_way(product,map,price, params)
 
 def get_product(urls, classrank, price):
     conn = sqlite3.connect('database.db')
