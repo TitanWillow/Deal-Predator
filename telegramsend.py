@@ -25,7 +25,7 @@ def get_chat_id(input):
     else:
         return False
 
-BOT_TOKEN = "7541088856:AAEtu--8VqndJP_umZxcZnaAMHSXU9p9fV8"
+BOT_TOKEN = ""
 #CHAT_ID = "1868562308"
 #MESSAGE = "Hello, this is a test message from your bot!"
 
